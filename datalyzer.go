@@ -13,7 +13,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -127,20 +126,20 @@ func main() {
 
 	fmt.Println(database)
 
-	// analyze the database
-	answers := answer{
-		Part1: part1(database),
-		Part2: part2(database),
-	}
+	// // analyze the database
+	// answers := answer{
+	// 	Part1: part1(database),
+	// 	Part2: part2(database),
+	// }
 
-	// format the analysis as json
-	answerString, err := json.MarshalIndent(answers, "", "    ")
+	// // format the analysis as json
+	// answerString, err := json.MarshalIndent(answers, "", "    ")
 
-	if err != nil {
-		panic(err)
-	}
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	// print the database to stdout
+	// // print the database to stdout
 
-	fmt.Println(string(answerString))
+	// fmt.Println(string(answerString))
 }
