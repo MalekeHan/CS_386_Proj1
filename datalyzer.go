@@ -13,9 +13,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"sort"
 )
 
 /********************************* TYPES **************************************/
@@ -42,20 +44,42 @@ type part1Answer struct {
 	NCiphertext cipherblock `json:"n_ciphertext"`
 }
 
+type cipherCount struct {
+	block cipherblock
+	count int
+}
+
 func part1(database []cipherrow) (answer part1Answer) {
+	gradeCount := make(map[cipherblock]int)
 
-	gradeMap := make(map[cipherblock]int)
-
+	// Loop through each row in the database
 	for _, row := range database {
-		gradeMap[row.grade]++
+		gradeCount[row.grade]++
 	}
 
-	for grade, count := range gradeMap {
-		fmt.Printf("Grade cipherblock: %x, Count: %d\n", grade, count)
+	// Convert the map to a slice of cipherCount structs for sorting.
+	var counts []cipherCount
+	for block, count := range gradeCount {
+		counts = append(counts, cipherCount{block, count})
 	}
 
-	_ = database
-	return
+	// Sort the slice by count in descending order.
+	sort.Slice(counts, func(i, j int) bool {
+		return counts[i].count > counts[j].count
+	})
+
+	// Assuming the grade distribution is correct and there's no noise in the data,
+	// the sorted blocks now represent grades A, B, C, and N in that order.
+	if len(counts) >= 4 {
+		answer.ACiphertext = counts[0].block
+		answer.BCiphertext = counts[1].block
+		answer.CCiphertext = counts[2].block
+		answer.NCiphertext = counts[3].block
+	}
+
+	// Now the answer should have the cipherblocks sorted by frequency,
+	// which should correspond to the grades A, B, C, and N.
+	return answer
 }
 
 /********************************* PART 2 *************************************/
@@ -126,20 +150,20 @@ func main() {
 
 	fmt.Println(database)
 
-	// // analyze the database
-	// answers := answer{
-	// 	Part1: part1(database),
-	// 	Part2: part2(database),
-	// }
+	// analyze the database
+	answers := answer{
+		Part1: part1(database),
+		Part2: part2(database),
+	}
 
-	// // format the analysis as json
-	// answerString, err := json.MarshalIndent(answers, "", "    ")
+	// format the analysis as json
+	answerString, err := json.MarshalIndent(answers, "", "    ")
 
-	// if err != nil {
-	// 	panic(err)
-	// }
+	if err != nil {
+		panic(err)
+	}
 
-	// // print the database to stdout
+	// print the database to stdout
 
-	// fmt.Println(string(answerString))
+	fmt.Println(string(answerString))
 }
