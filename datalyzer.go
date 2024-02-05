@@ -68,15 +68,15 @@ func part1(database []cipherrow) (answer part1Answer) {
 	answer.NCiphertext = cipherblocks_keys[3]
 
 	//Save the identified cipher text to be used later on
-	identifiedGrades.A = cipherblocks_keys[0]
-	identifiedGrades.B = cipherblocks_keys[1]
-	identifiedGrades.C = cipherblocks_keys[2]
-	identifiedGrades.N = cipherblocks_keys[3]
+	cipherToGrades.A = cipherblocks_keys[0]
+	cipherToGrades.B = cipherblocks_keys[1]
+	cipherToGrades.C = cipherblocks_keys[2]
+	cipherToGrades.N = cipherblocks_keys[3]
 
 	return answer
 }
 
-var identifiedGrades struct {
+var cipherToGrades struct {
 	A cipherblock
 	B cipherblock
 	C cipherblock
@@ -95,47 +95,42 @@ type part2Answer struct {
 }
 
 func part2(database []cipherrow) (answer part2Answer) {
-	// Maps to keep track of grade counts for each student
-	studentGrades := make(map[cipherblock]map[string]uint32)
-	// Set to keep track of students who have received a B
-	studentsWithB := make(map[cipherblock]bool)
 
+	studentGrades := make(map[cipherblock]map[string]uint32) // create a map of maps -- this is [studentID |--> [A |--> int, B |--> int, C |--> int]]
+	studentsWithB := make(map[cipherblock]bool)              // allows us to map each student to whether they have recieved a B  [studentID |--> bool]
+
+	// go through every single line for in the data base
 	for _, row := range database {
-		// Check if this grade is a 'B'. If so, mark the student and continue to the next row
-		if row.grade == identifiedGrades.B {
-			studentsWithB[row.id] = true
+
+		if row.grade == cipherToGrades.B { // check to see if this grade is a b
+			studentsWithB[row.id] = true // if it is a b mark it and move on
 			continue
 		}
 
-		// Initialize the student's grade map if it doesn't exist
-		if _, exists := studentGrades[row.id]; !exists {
-			studentGrades[row.id] = make(map[string]uint32)
+		if _, exists := studentGrades[row.id]; !exists { // create the grade map here if it does not already exist for this student
+			studentGrades[row.id] = make(map[string]uint32) // then we can create the inner map for them
 		}
 
-		// Update the count for the grade, if it's not a 'B'
-		if row.grade == identifiedGrades.A {
+		if row.grade == cipherToGrades.A { //update the count for all non-b's
 			studentGrades[row.id]["A"]++
-		} else if row.grade == identifiedGrades.C {
+		} else if row.grade == cipherToGrades.C {
 			studentGrades[row.id]["C"]++
-		} else if row.grade == identifiedGrades.N {
+		} else if row.grade == cipherToGrades.N {
 			studentGrades[row.id]["N"]++
 		}
 	}
 
-	var result part2Answer
-
-	// Assuming there's only one student who fits the criteria (never received a 'B')
+	// go through all the student grades
 	for id, grades := range studentGrades {
-		if !studentsWithB[id] { // This student never got a 'B'
-			// Assuming part2Answer structure is meant to capture the counts for a single student
-			result.NumAs = grades["A"]
-			result.NumCs = grades["C"]
-			result.NumNs = grades["N"]
-			break // Assuming we're only looking for one student
+		if !studentsWithB[id] { // check to see if this studentID got marked as false
+			answer.NumAs = grades["A"]
+			answer.NumCs = grades["C"]
+			answer.NumNs = grades["N"]
+			break // break as soon as we finally get the student
 		}
 	}
 
-	return result
+	return answer
 
 }
 
