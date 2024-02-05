@@ -67,7 +67,20 @@ func part1(database []cipherrow) (answer part1Answer) {
 	answer.CCiphertext = cipherblocks_keys[2]
 	answer.NCiphertext = cipherblocks_keys[3]
 
+	//Save the identified cipher text to be used later on
+	identifiedGrades.A = cipherblocks_keys[0]
+	identifiedGrades.B = cipherblocks_keys[1]
+	identifiedGrades.C = cipherblocks_keys[2]
+	identifiedGrades.N = cipherblocks_keys[3]
+
 	return answer
+}
+
+var identifiedGrades struct {
+	A cipherblock
+	B cipherblock
+	C cipherblock
+	N cipherblock
 }
 
 /********************************* PART 2 *************************************/
@@ -82,8 +95,48 @@ type part2Answer struct {
 }
 
 func part2(database []cipherrow) (answer part2Answer) {
-	_ = database
-	return
+	// Maps to keep track of grade counts for each student
+	studentGrades := make(map[cipherblock]map[string]uint32)
+	// Set to keep track of students who have received a B
+	studentsWithB := make(map[cipherblock]bool)
+
+	for _, row := range database {
+		// Check if this grade is a 'B'. If so, mark the student and continue to the next row
+		if row.grade == identifiedGrades.B {
+			studentsWithB[row.id] = true
+			continue
+		}
+
+		// Initialize the student's grade map if it doesn't exist
+		if _, exists := studentGrades[row.id]; !exists {
+			studentGrades[row.id] = make(map[string]uint32)
+		}
+
+		// Update the count for the grade, if it's not a 'B'
+		if row.grade == identifiedGrades.A {
+			studentGrades[row.id]["A"]++
+		} else if row.grade == identifiedGrades.C {
+			studentGrades[row.id]["C"]++
+		} else if row.grade == identifiedGrades.N {
+			studentGrades[row.id]["N"]++
+		}
+	}
+
+	var result part2Answer
+
+	// Assuming there's only one student who fits the criteria (never received a 'B')
+	for id, grades := range studentGrades {
+		if !studentsWithB[id] { // This student never got a 'B'
+			// Assuming part2Answer structure is meant to capture the counts for a single student
+			result.NumAs = grades["A"]
+			result.NumCs = grades["C"]
+			result.NumNs = grades["N"]
+			break // Assuming we're only looking for one student
+		}
+	}
+
+	return result
+
 }
 
 /***************************** Provided Code **********************************/
