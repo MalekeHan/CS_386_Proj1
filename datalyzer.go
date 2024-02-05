@@ -44,41 +44,29 @@ type part1Answer struct {
 	NCiphertext cipherblock `json:"n_ciphertext"`
 }
 
-type cipherCount struct {
-	block cipherblock
-	count int
-}
-
 func part1(database []cipherrow) (answer part1Answer) {
-	gradeCount := make(map[cipherblock]int)
+	gradeMap := make(map[cipherblock]int)
 
 	// Loop through each row in the database
 	for _, row := range database {
-		gradeCount[row.grade]++
+		gradeMap[row.grade]++
 	}
 
-	// Convert the map to a slice of cipherCount structs for sorting.
-	var counts []cipherCount
-	for block, count := range gradeCount {
-		counts = append(counts, cipherCount{block, count})
+	var cipherblocks_keys []cipherblock // create a slice to hold all the keys we got from gradeMap
+	for key := range gradeMap {
+		cipherblocks_keys = append(cipherblocks_keys, key)
 	}
 
-	// Sort the slice by count in descending order.
-	sort.Slice(counts, func(i, j int) bool {
-		return counts[i].count > counts[j].count
+	sort.Slice(cipherblocks_keys, func(i, j int) bool {
+		return gradeMap[cipherblocks_keys[i]] > gradeMap[cipherblocks_keys[j]] //look at cipher blocks at the two positions and get the counts from grademap -- whatever is greater should go first in cipher blocks
 	})
 
-	// Assuming the grade distribution is correct and there's no noise in the data,
-	// the sorted blocks now represent grades A, B, C, and N in that order.
-	if len(counts) >= 4 {
-		answer.ACiphertext = counts[0].block
-		answer.BCiphertext = counts[1].block
-		answer.CCiphertext = counts[2].block
-		answer.NCiphertext = counts[3].block
-	}
+	// we know because of the distr that
+	answer.ACiphertext = cipherblocks_keys[0]
+	answer.BCiphertext = cipherblocks_keys[1]
+	answer.CCiphertext = cipherblocks_keys[2]
+	answer.NCiphertext = cipherblocks_keys[3]
 
-	// Now the answer should have the cipherblocks sorted by frequency,
-	// which should correspond to the grades A, B, C, and N.
 	return answer
 }
 
@@ -148,7 +136,7 @@ func main() {
 	// parse the database from stdin
 	database := parse(os.Stdin)
 
-	fmt.Println(database)
+	//fmt.Println(database)
 
 	// analyze the database
 	answers := answer{
