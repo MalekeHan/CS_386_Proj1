@@ -1,0 +1,66 @@
+PROTOCOL:
+    - Network traffic split into packets
+        - bi-directional encryption with "K" key
+        - hub encrypts responsees before transmitting back to the room router
+
+    - Perfect secrecty is broken if the smae key is used for multiple messages
+        - Learning the encrytpion of "hello" means seeing it again in the future allows us to know the M was "hello"
+        
+    - Each encyption uses an Initialization Vector (IV)
+        - encryption = Fixed_Key + IV  
+            - as long as two different IVs are used for the same plaintext it will be different
+    
+    - G = "psuedo random number generator"
+        -  not truly "random" --> emulates a random mapping
+            - pretend G is a random mapping
+
+        Does not work like this:
+            {0,1}^n -> {0,1}^n' for a fixed n and n'
+
+        G accepts inputs and outputs of any length:
+            G = {0,1}^* x -> N -> {0,1}*
+                - {0,1}^* is the seed
+                - N informs G how many bits of output to produce
+
+        G is deterministic --> always gives the same output to the same inputs
+
+    - R a source of randomness
+        - Each time R is queried, it generates a uniformly-random number in which it is 16 bits long 
+            - {0,1}^16 
+
+    The receiver of the encryption must know the IV so our encryption fucntion must return that 
+        - IV IS SENT WITH THE CIPHERTEXT
+
+    The first thing a router does after establishing a wireless link is to send the key encrpyted iteself to the hub
+        - E(k,k)
+
+
+PROBLEM:
+    - We can see the (IV, Ciphertext) pairs sent in the encrytpion
+    - We can see the encryption of the Key E(k,k)
+    - Can perform "Chosen Plaintext Attacks"
+        - Choose the plaintext to send and see what it encypts to
+
+HINTS:
+    What do you learn from the first message    the router sends to the hub?
+        - THe first message is E(k,k) --> We learn the IV and the Ciphertext of the Key of the VERY FIRST IV used
+
+        - The router and the hub shares the key ahead of time
+        
+    How many possible values of the initialization vector are there?
+        - 2^16
+            - I know the IV is 16 bits long
+    Your solution should work for any key length, so your attack can't depend upon the key being any particular length.
+
+    Trigger a message to myself to get the IV and Ciphertext
+
+    Encryption oracle
+
+    Kind of acting like the router 
+
+    -G : K + IV --> bitstrings to whatever length
+    How can manipulate two different cipher texts 
+
+    -No way to do the assignment manually
+
+    The fact that the 16 bits long is important 
